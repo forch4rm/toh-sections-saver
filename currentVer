@@ -258,10 +258,12 @@ savedSections.Name = "savedSections";
 savedSections.Parent = lighting;
 
 local function moveSections(tower: Model)
-	local sections = tower:FindFirstChild("sections");
+	local sections = tower:WaitForChild("sections", math.huge);
+	print("Waiting for sections to move them.");
 
 	if sections then
-		local lobby = sections:FindFirstChild("lobby");
+		local lobby = sections:WaitForChild("lobby", math.huge);
+		print("Waiting for the lobby.");
 
 		if lobby then
 			for _, sectionModel in sections:GetChildren() do
@@ -278,7 +280,8 @@ local function moveSections(tower: Model)
 end;
 
 local function saveSections(tower: Model)
-	local sections = tower:FindFirstChild("sections");
+	local sections = tower:WaitForChild("sections", math.huge);
+	print("Waiting for sections to save them.");
 
 	if sections then
 		for _, sectionModel in sections:GetChildren() do
