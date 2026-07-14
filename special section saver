@@ -1,0 +1,71 @@
+--[[    charm wuz here!
+    section saver v. 1.0.1     ]]
+
+local sectionsToSave = {
+	"Hex";
+	"Loose Bricks";
+};
+
+local lighting = game:GetService("Lighting");
+local savedSections = Instance.new("Folder");
+
+savedSections.Name = "savedSections";
+savedSections.Parent = lighting;
+
+local function moveSections(tower: Model)
+	local sections = tower:WaitForChild("sections", math.huge);
+	print("Waiting for sections to move them...");
+
+	if sections then
+		local lobby = sections:WaitForChild("lobby", math.huge);
+		print("Waiting for the lobby...");
+
+		if lobby then
+			print("Moving sections... Don't skip the tower.");
+
+			for _, sectionModel in sections:GetChildren() do
+				if sectionModel.Name ~= "lobby" and sectionModel.Name ~= "finish" then
+					sectionModel:PivotTo(lobby:GetPivot());
+				end;
+			end;
+
+			print("Successfully moved sections. Don't skip the tower.");
+		else
+			warn("Lobby not found.");
+		end;
+	else
+		warn("Sections not found.");
+	end;
+end;
+
+local function saveSections(tower: Model)
+	local sections = tower:WaitForChild("sections", math.huge);
+	print("Waiting for sections to save them...");
+
+	if sections then
+		print("Saving sections... Don't skip the tower.");
+
+		for _, sectionModel in sections:GetChildren() do
+			if sectionModel.Name ~= "lobby" and sectionModel.Name ~= "finish" then
+				if table.find(sectionsToSave, sectionModel.Name) then
+					sectionModel:Clone().Parent = savedSections;
+					table.remove(sectionsToSave, sectionModel.Name);
+					
+					print("Successfully saved", sectionModel.Name);
+				end;
+			end;
+		end;
+	else
+		warn("Sections not found.");
+	end;
+end;
+
+workspace.ChildAdded:Connect(function(child: Instance)
+	if child:IsA("Model") and child.Name == "tower" then
+		task.wait(1);
+		moveSections(child);
+		task.wait(1);
+		saveSections(child);
+		print("Save operation complete. Skip the tower.");
+	end;
+end);
