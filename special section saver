@@ -1,5 +1,5 @@
 --[[    charm wuz here!
-    section saver v. 1.0.1     ]]
+    section saver v. 1.0.3     ]]
 
 local sectionsToSave = {
 	"Hex";
@@ -42,7 +42,7 @@ local function teleportPlayer(tower: Model)
 					print("Waiting...");
 					
 					sectionModel:Clone().Parent = savedSections;
-					table.remove(sectionsToSave, sectionModel.Name);
+					table.remove(sectionsToSave, table.find(sectionsToSave, sectionModel.Name));
 					
 					print("Successfully saved", sectionModel.Name);
 				end;
