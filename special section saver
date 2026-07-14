@@ -7,47 +7,40 @@ local sectionsToSave = {
 };
 
 local lighting = game:GetService("Lighting");
+local players = game:GetService("Players");
+
+local localPlayer = players.LocalPlayer;
 local savedSections = Instance.new("Folder");
 
 savedSections.Name = "savedSections";
 savedSections.Parent = lighting;
 
-local function moveSections(tower: Model)
+local function teleportPlayer(tower: Model)
 	local sections = tower:WaitForChild("sections", math.huge);
-	print("Waiting for sections to move them...");
+	print("Waiting for sections...");
+	
+	local character = localPlayer.Character or localPlayer.CharacterAdded:Wait();
+	print("Waiting for character...");
 
-	if sections then
-		local lobby = sections:WaitForChild("lobby", math.huge);
-		print("Waiting for the lobby...");
-
-		if lobby then
-			print("Moving sections... Don't skip the tower.");
-
-			for _, sectionModel in sections:GetChildren() do
-				if sectionModel.Name ~= "lobby" and sectionModel.Name ~= "finish" then
-					sectionModel:PivotTo(lobby:GetPivot());
-				end;
-			end;
-
-			print("Successfully moved sections. Don't skip the tower.");
-		else
-			warn("Lobby not found.");
-		end;
-	else
-		warn("Sections not found.");
-	end;
-end;
-
-local function saveSections(tower: Model)
-	local sections = tower:WaitForChild("sections", math.huge);
-	print("Waiting for sections to save them...");
-
-	if sections then
-		print("Saving sections... Don't skip the tower.");
-
+	local humanoidRootPart = character:WaitForChild("HumanoidRootPart", math.huge) :: BasePart;
+	print("Waiting for HumanoidRootPart...");
+	
+	local humanoid = character:WaitForChild("Humanoid", math.huge) :: Humanoid;
+	print("Waiting for humanoid...");
+	
+	if character and humanoidRootPart and humanoid and sections then
 		for _, sectionModel in sections:GetChildren() do
-			if sectionModel.Name ~= "lobby" and sectionModel.Name ~= "finish" then
-				if table.find(sectionsToSave, sectionModel.Name) then
+			if table.find(sectionsToSave, sectionModel.Name) then
+				local start = sectionModel:WaitForChild("start") :: BasePart;
+				print("Found", sectionModel.Name, "waitig for start part...");
+				
+				if start then
+					humanoidRootPart.CFrame = CFrame.new(start.CFrame.Position) + Vector3.new(0, humanoid.HipHeight, 0);
+					print("Teleported player to section", sectionModel.Name);
+					
+					task.wait(2);
+					print("Waiting...");
+					
 					sectionModel:Clone().Parent = savedSections;
 					table.remove(sectionsToSave, sectionModel.Name);
 					
@@ -55,17 +48,18 @@ local function saveSections(tower: Model)
 				end;
 			end;
 		end;
-	else
-		warn("Sections not found.");
+		
+		print("---------------------------------------------------------------------");
+		print("All sections checked. Skip the tower if some of sections didn't save.");
 	end;
 end;
 
 workspace.ChildAdded:Connect(function(child: Instance)
 	if child:IsA("Model") and child.Name == "tower" then
+		print("--------------------------- CYCLE STARTED ---------------------------");
 		task.wait(1);
-		moveSections(child);
+		teleportPlayer(child);
 		task.wait(1);
-		saveSections(child);
-		print("Save operation complete. Skip the tower.");
+		print("---------------------------- CYCLE ENDED ----------------------------");
 	end;
 end);
